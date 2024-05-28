@@ -1,0 +1,10 @@
+    int x;
+    float y;
+    x = 10;
+    y = 3.14;
+
+    if (x > 5 && y < 10.0) {
+        printf(x);
+    } else {
+        printf(y);
+    }

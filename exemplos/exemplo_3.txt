@@ -1,0 +1,41 @@
+inizio
+int a = 10+15+20/2;
+string b = "10.5";
+float c = 10.5;
+
+c = 15.5+15.5;
+b = "15.5"+"15.5";
+a = 15+15;
+
+se(a > 10)
+{
+    a = 15 + 20;
+    scrivere(a);
+}altrimenti
+{
+    b = "Vai Corinthians";
+    scrivere(b);
+}
+
+int i = 1;
+mentre(i < 3)
+{
+     scrivere("Numero 10");
+     i++;
+}
+
+a=5;
+scrivere("Contando de 5 até 0");
+fare{
+    scrivere(a);
+    a--;
+}mentre(a > 10);
+
+scrivere("A soma e menor ou igual a 15.");
+
+leggere(b, "Qual o seu nome?");
+
+scrivere("Bem vindo,");
+scrivere(b);
+
+fine
