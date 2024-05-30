@@ -8,7 +8,6 @@ public class Pele {
 
     String code = "";
     String buffer = "";
-    // Tabela de símbolos para armazenar variáveis declaradas
     Map<String, String> symbolTable = new HashMap<>();
 
     public Pele() {
@@ -16,19 +15,16 @@ public class Pele {
         this.symbolTable = new HashMap<>();
     }
     
-    // Method that prints a string
     protected void printString(String str) {
         code += "System.out.println(" + str + ");";
     }
 
-    // Method that adds public class and private main method
     protected void printInicio() {
         code += "import java.util.Scanner;\n";
         code += "public class Output {\n";
         code += "public static void main(String[] args) {\n";
     }
 
-    // Method that closes the public class and private main method
     protected void printFim() {
         code += "}\n";
         code += "}\n";
@@ -47,7 +43,6 @@ public class Pele {
     }
 
     protected void limpaBuffer() {
-
         buffer = "";
     }
 
@@ -72,8 +67,6 @@ public class Pele {
     }
 
     protected void declararVariavel(String nome, String tipo) {
-        // Implementação do declararVariavel de acordo com a sua definição
-        // Verifica se a variável já foi declarada
         boolean isdeclared = checkVariableDeclared(nome);
 
         if (isdeclared) {
@@ -97,7 +90,6 @@ public class Pele {
             throw new IllegalArgumentException("Tipo de variável inválido: " + tipo);
         }
 
-        // Verifica se o valor é compatível com o tipo
         if (valor != null) {
             boolean isValidType = checkVariableType(valor, tipo);
             if (!isValidType) {
@@ -105,10 +97,8 @@ public class Pele {
             }
         }
 
-        // Adiciona a variavel na tabela de simbolos
         this.symbolTable.put(nome, tipo);
         
-        // Adiciona a variavel no código
         if (tipo.equals("bool")) {
             valor = getValidJavaBoolean(valor);
             tipo = "boolean";
@@ -121,15 +111,12 @@ public class Pele {
     }
 
     protected void atribuirVariavel(String nome) {
-        // Implementação do atribuirVariavel de acordo com a sua definição
-        // Verifica se a variável já foi declarada
         boolean isdeclared = checkVariableDeclared(nome);
 
         if (!isdeclared) {
             throw new IllegalArgumentException("Variável não declarada: " + nome);
         }
         String tipo = this.symbolTable.get(nome);
-        // Tenta atribuir o valor a variável
 
         String valor = null;
 
@@ -148,7 +135,6 @@ public class Pele {
             throw new IllegalArgumentException("Tipo de variável inválido: " + tipo);
         }
 
-        // Verifica se o valor é compatível com o tipo
         boolean isValidType = checkVariableType(valor, tipo);
         if (!isValidType) {
             throw new IllegalArgumentException("Valor incompatível da variável: " + nome);
@@ -163,7 +149,7 @@ public class Pele {
     }
 
     private String getValidJavaBoolean(String value) {
-        if (value.equals("vero")) {
+        if (value.equals("verdadeiro")) {
             return "true";
         } else if (value.equals("falso")) {
             return "false";
@@ -188,7 +174,7 @@ public class Pele {
         } else if (tipo.toLowerCase().equals("string")) {
             return true;
         } else if (tipo.equals("bool")) {
-            if (!valor.equals("vero") && !valor.equals("falso")) {
+            if (!valor.equals("verdadeiro") && !valor.equals("falso")) {
                 return false;
             }
         } else {
@@ -197,7 +183,6 @@ public class Pele {
         return true;
     }
 
-    // Método que verifica se a variável já foi declarada
     protected boolean checkVariableDeclared(String nome) {
         if (!this.symbolTable.containsKey(nome)) {
             return false;
@@ -207,14 +192,12 @@ public class Pele {
     }
 
     protected void lerUserInput(String id, String question){
-        // Verifica se a variável já foi declarada
         boolean isdeclared = checkVariableDeclared(id);
 
         if (!isdeclared) {
             throw new IllegalArgumentException("Variável não declarada: " + id);
         }
 
-        // Obtem o tipo da variavel
         String tipo = this.symbolTable.get(id);
 
         code += "Scanner userInput = new Scanner(System.in);\n";
@@ -235,19 +218,14 @@ public class Pele {
         code += "userInput.close();\n";
     }
 
-    // Method that writes the code string to a java file
     public void writeCode() {
-        // Open a file
         try {
             FileWriter fileWriter = new FileWriter("Output.java");
 
-            // Always wrap FileWriter in BufferedWriter
             BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
 
-            // Write the code string to the file
             bufferedWriter.write(this.code);
 
-            // Close the file
             bufferedWriter.close();
         } catch (IOException ex) {
             System.out.println("Error writing to file '" + "Output.java" + "'");

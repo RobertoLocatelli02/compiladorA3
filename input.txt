@@ -1,0 +1,32 @@
+inicio
+int x = 5;
+int y = 10;
+float z = 3.14;
+boolean flag = verdadeiro;
+
+se (x > y) {
+    escrever("x é maior que y");
+} senao {
+    escrever("x não é maior que y");
+}
+
+se (flag == verdadeiro) {
+    escrever("flag é verdadeiro");
+} senao {
+    escrever("flag é falso");
+}
+
+enquanto (x < y) {
+    escrever("x ainda é menor que y");
+    x++;
+}
+
+fazer {
+    escrever("Executando do-while loop");
+    x++;
+} enquanto (x < y);
+
+ler(x, "Por favor, insira um valor para x");
+escrever(x);
+
+fim
