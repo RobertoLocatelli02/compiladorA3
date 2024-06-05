@@ -4,19 +4,19 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Pele {
+public class Compilador {
 
     String code = "";
     String buffer = "";
     Map<String, String> symbolTable = new HashMap<>();
 
-    public Pele() {
+    public Compilador() {
         this.code = "";
         this.symbolTable = new HashMap<>();
     }
-    
+
     protected void printString(String str) {
-        code += "System.out.println(" + str + ");";
+        code += "System.out.println(\"" + str + "\");";
     }
 
     protected void printInicio() {
@@ -30,77 +30,49 @@ public class Pele {
         code += "}\n";
     }
 
-    protected void printAC(){
+    protected void printAbreEscopo(){
         code += "{\n";
     }
 
-    protected void printFC(){
+    protected void printFechaEscopo(){
         code += "}\n";
     }
 
-    protected void adicionaBuffer(String str) {
-        buffer += str;
-    }
-
-    protected void limpaBuffer() {
-        buffer = "";
-    }
-
-    protected void incrementaVariavel(String nome){
-        boolean isdeclared = checkVariableDeclared(nome);
-        
-        if (!isdeclared) {
-            throw new IllegalArgumentException("Variável não declarada: " + nome);
-        }
-
-        code+= nome + "++;\n";
-    }
-
-    protected void decrementaVariavel(String nome){
-        boolean isdeclared = checkVariableDeclared(nome);
-        
-        if (!isdeclared) {
-            throw new IllegalArgumentException("Variável não declarada: " + nome);
-        }
-
-        code+= nome + "--;\n";
-    }
-
     protected void declararVariavel(String nome, String tipo) {
-        boolean isdeclared = checkVariableDeclared(nome);
+        boolean declarada = validarVariavelDeclarada(nome);
 
-        if (isdeclared) {
+        if (declarada) {
             throw new IllegalArgumentException("Variável já declarada: " + nome);
         }
 
         String valor = null;
 
-        if (tipo.equals("bool")) {
-            tipo = "boolean";
-        } else if (tipo.equals("string")) {
-            tipo = "String";
-            valor = this.buffer;
-        } else if (tipo.equals("int")) {
+        if (tipo.equals("int")) {
             double result = ExpressionSolver.evaluateExpression(this.buffer);
             valor = String.valueOf((int) result);
+        } else if (tipo.equals("string")) {
+            tipo = "String";
+            valor = "\"" + this.buffer + "\"";
         } else if (tipo.equals("float")) {
             double result = ExpressionSolver.evaluateExpression(this.buffer);
             valor = String.valueOf(result);
+        } else if (tipo.equals("boolean")) {
+            tipo = "boolean";
         } else {
             throw new IllegalArgumentException("Tipo de variável inválido: " + tipo);
         }
 
         if (valor != null) {
-            boolean isValidType = checkVariableType(valor, tipo);
-            if (!isValidType) {
+            boolean tipoValido = validarTipagemVariavel(valor, tipo);
+            if (!tipoValido) {
                 throw new IllegalArgumentException("Valor incompatível da variável: " + nome);
             }
         }
 
         this.symbolTable.put(nome, tipo);
-        
-        if (tipo.equals("bool")) {
-            valor = getValidJavaBoolean(valor);
+
+        if (tipo.equals("boolean")) {
+            valor = validarBooleanoJava(valor);
             tipo = "boolean";
         } else if (tipo.equals("float")) {
             tipo = "double";
@@ -111,20 +83,20 @@ public class Pele {
     }
 
     protected void atribuirVariavel(String nome) {
-        boolean isdeclared = checkVariableDeclared(nome);
+        boolean declarada = validarVariavelDeclarada(nome);
 
-        if (!isdeclared) {
+        if (!declarada) {
             throw new IllegalArgumentException("Variável não declarada: " + nome);
         }
         String tipo = this.symbolTable.get(nome);
 
         String valor = null;
 
-        if (tipo.toLowerCase().equals("bool")) {
+        if (tipo.toLowerCase().equals("boolean")) {
             tipo = "boolean";
         } else if (tipo.toLowerCase().equals("string")) {
             tipo = "String";
-            valor = this.buffer;
+            valor = "\"" + this.buffer + "\""; 
         } else if (tipo.toLowerCase().equals("int")) {
             double result = ExpressionSolver.evaluateExpression(this.buffer);
             valor = String.valueOf((int) result);
@@ -135,30 +107,40 @@ public class Pele {
             throw new IllegalArgumentException("Tipo de variável inválido: " + tipo);
         }
 
-        boolean isValidType = checkVariableType(valor, tipo);
-        if (!isValidType) {
+        boolean tipoValido = validarTipagemVariavel(valor, tipo);
+        if (!tipoValido) {
             throw new IllegalArgumentException("Valor incompatível da variável: " + nome);
         }
 
         // Adiciona a variavel no código
-        if (tipo.equals("bool")) {
-            valor = getValidJavaBoolean(valor);
+        if (tipo.equals("boolean")) {
+            valor = validarBooleanoJava(valor);
         }
         code += nome + " = " + valor + ";\n";
         this.limpaBuffer();
     }
 
-    private String getValidJavaBoolean(String value) {
-        if (value.equals("verdadeiro")) {
-            return "true";
-        } else if (value.equals("falso")) {
-            return "false";
-        } else {
-            return "false";
+    protected void incrementaVariavel(String nome){
+        boolean declarada = validarVariavelDeclarada(nome);
+
+        if (!declarada) {
+            throw new IllegalArgumentException("Variável não declarada: " + nome);
         }
+
+        code+= nome + "++;\n";
     }
 
-    private boolean checkVariableType(String valor, String tipo){
+    protected void decrementaVariavel(String nome){
+        boolean declarada = validarVariavelDeclarada(nome);
+
+        if (!declarada) {
+            throw new IllegalArgumentException("Variável não declarada: " + nome);
+        }
+
+        code+= nome + "--;\n";
+    }
+
+    private boolean validarTipagemVariavel(String valor, String tipo){
         if (tipo.toLowerCase().equals("int")) {
             try {
                 Integer.parseInt(valor);
@@ -173,7 +155,7 @@ public class Pele {
             }
         } else if (tipo.toLowerCase().equals("string")) {
             return true;
-        } else if (tipo.equals("bool")) {
+        } else if (tipo.equals("boolean")) {
             if (!valor.equals("verdadeiro") && !valor.equals("falso")) {
                 return false;
             }
@@ -183,7 +165,7 @@ public class Pele {
         return true;
     }
 
-    protected boolean checkVariableDeclared(String nome) {
+    protected boolean validarVariavelDeclarada(String nome) {
         if (!this.symbolTable.containsKey(nome)) {
             return false;
         } else {
@@ -191,17 +173,35 @@ public class Pele {
         }
     }
 
-    protected void lerUserInput(String id, String question){
-        boolean isdeclared = checkVariableDeclared(id);
+    protected void adicionaBuffer(String str) {
+        buffer += str;
+    }
 
-        if (!isdeclared) {
+    protected void limpaBuffer() {
+        buffer = "";
+    }
+
+    private String validarBooleanoJava(String value) {
+        if (value.equals("verdadeiro")) {
+            return "true";
+        } else if (value.equals("falso")) {
+            return "false";
+        } else {
+            return "false";
+        }
+    }
+
+    protected void lerUserInput(String id, String question){
+        boolean declarada = validarVariavelDeclarada(id);
+
+        if (!declarada) {
             throw new IllegalArgumentException("Variável não declarada: " + id);
         }
 
         String tipo = this.symbolTable.get(id);
 
         code += "Scanner userInput = new Scanner(System.in);\n";
-        code += "System.out.println(" + question + ");\n";
+        code += "System.out.println(\"" + question + "\");\n";
         if (tipo.toLowerCase().equals("int")) {
             code += id + " = userInput.nextInt();\n";
         } else if (tipo.toLowerCase().equals("float")) {
@@ -209,16 +209,13 @@ public class Pele {
         } else if (tipo.toLowerCase().equals("string")) {
             code += id + " = userInput.nextLine();\n";
         } else if (tipo.toLowerCase().equals("bool")) {
-            code += id + " = userInput.nextLine();\n";
+            code += id + " = userInput.nextBoolean();\n";
         } else {
             throw new IllegalArgumentException("Tipo de variável inválido: " + tipo);
         }
-
-        
-        code += "userInput.close();\n";
     }
 
-    public void writeCode() {
+    public void escreverCodigo() {
         try {
             FileWriter fileWriter = new FileWriter("Output.java");
 
@@ -232,8 +229,5 @@ public class Pele {
         }
 
     }
-
-    
-    
 
 }
